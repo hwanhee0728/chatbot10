@@ -129,12 +129,14 @@ def app():
             if password == password_key:
                 # 비밀번호가 맞으면 다운로드 버튼 표시
                 st.success("패스워드 확인 완료!")
-                
+
                 st.write("")
                 user_input = st.text_input(":eight_pointed_black_star:민사고에 대해 질문하고 엔터를 눌러주세요! (단, 민사고는 KMLA로 입력요망)")
 
-                st.caption(':sparkles:예시) 학생자치위원회 업무를 요약해줄래? KMLA에 가는 길을 알려줄래?')
-                st.caption(':sparkles:예시) 벌점이 3점 이상인 경우 10가지? 병결 신청절차를 상세히 알려줄래?')
+                st.caption('(챗봇이 공부한 자료) 학교규정집, 학교연혁, 교직원현황, 방문안내 등')
+                st.caption('(예시 1) 학생자치위원회 업무를 요약해줄래? KMLA에 가는 길을 알려줄래?')
+                st.caption('(예시 2) 민족6품제 규정은? 외국어 능력 기준은? 자율시험제는?')
+                st.caption('(예시 3) 벌점이 3점 이상인 경우 10가지? 병결 신청절차를 상세히 알려줄래?')
                 st.write("")
 
                 if user_input:
