@@ -110,6 +110,7 @@ def app():
 
         st.write("")
         st.write("")
+        st.write("")
         # 엑셀 다운로드
         admin_password = st.text_input(":computer: 관리자", type="password")
         if admin_password:
@@ -128,7 +129,8 @@ def app():
             if password == password_key:
                 # 비밀번호가 맞으면 다운로드 버튼 표시
                 st.success("패스워드 확인 완료!")
-
+                
+                st.write("")
                 user_input = st.text_input(":eight_pointed_black_star:민사고에 대해 질문하고 엔터를 눌러주세요! (단, 민사고는 KMLA로 입력요망)")
 
                 st.caption(':sparkles:예시) 학생자치위원회 업무를 요약해줄래? KMLA에 가는 길을 알려줄래?')
