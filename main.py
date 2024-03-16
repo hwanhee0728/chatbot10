@@ -106,7 +106,7 @@ def app():
         st.caption('아래 만족도조사 하신분께')
         st.caption(':unicorn_face:추첨 : 2만원 * 3명')
         st.caption(':unicorn_face:선정 : 2만원 * 2명')
-        st.markdown('<a href="https://abc.com" target="_blank">만족도조사</a>', unsafe_allow_html=True)
+        st.markdown('<a href="https://survey10.streamlit.app/" target="_blank">만족도조사</a>', unsafe_allow_html=True)
 
         st.write("")
         st.write("")
