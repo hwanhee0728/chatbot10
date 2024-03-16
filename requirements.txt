@@ -7,5 +7,6 @@ streamlit
 pypdf
 tiktoken
 chromadb
+openpyxl
 pysqlite3-binary
 ctransformers
