@@ -1,0 +1,166 @@
+# Streamlit에 올릴때 필요한 코드 (sql 오류 fix위해)
+# __import__('pysqlite3')
+# import sys
+# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
+
+# langchain 라이브러리를 Import한다.
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain.retrievers.multi_query import MultiQueryRetriever
+from langchain.chains import RetrievalQA
+
+from dotenv import load_dotenv
+
+import streamlit as st
+from PIL import Image
+import pandas as pd
+import tempfile
+import os
+import io
+import time
+
+# Stream을 위한 Import
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.callbacks.base import BaseCallbackHandler
+
+import socket
+import datetime
+from openpyxl import Workbook, load_workbook
+from openpyxl.utils import get_column_letter
+
+
+# 엑셀 파일에 데이터를 기록하는 함수입니다.
+def log_question_to_excel(question, ip_address, timestamp):
+    filename = 'question_log.xlsx'
+    try:
+        # 엑셀 파일이 이미 존재하면 로드하고, 그렇지 않으면 새 파일을 생성합니다.
+        try:
+            workbook = load_workbook(filename)
+            sheet = workbook.active
+        except FileNotFoundError:
+            workbook = Workbook()
+            sheet = workbook.active
+            sheet['A1'] = 'Question'
+            sheet['B1'] = 'IP Address'
+            sheet['C1'] = 'Timestamp'
+
+        # 새로운 데이터를 추가합니다.
+        new_row = (question, ip_address, timestamp)
+        sheet.append(new_row)
+
+        # 파일을 저장합니다.
+        workbook.save(filename)
+    except Exception as e:
+        print(f"Error logging question to Excel: {e}")
+
+
+# 로컬 IP 주소를 가져오는 함수입니다.
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # 이 IP는 실제로 연결되지 않지만, 루프백 주소(127.0.0.1)를 반환하지 않도록 합니다.
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
+
+# 환경변수를 로드한다. (ChatGPT API Key를 .env라는 파일에 넣어야 함. OPENAI_API_KEY=시리얼넘버)
+load_dotenv()
+
+password_key = os.getenv('KEY')
+admin_key = os.getenv('ADMIN')
+
+
+# 엑셀 파일 다운로드를 위한 함수
+def download_excel():
+    filename = 'question_log.xlsx'
+    with open(filename, "rb") as file:
+        btn = st.download_button(
+                label="질문 로그 다운로드",
+                data=file,
+                file_name=filename,
+                mime="application/vnd.ms-excel"
+            )
+
+def app():
+
+    col1, col2 = st.columns([1,3])
+
+    with col1:
+        st.subheader(':robot_face: Chatbot')
+        image = Image.open('robot01.png')
+        st.image(image, width=160)
+
+        st.write("")
+        st.write("")
+        st.write(':star:별다방쿠폰 드려욧')
+        st.caption('우측 화면의 챗봇 사용 후,')
+        st.caption('아래 만족도조사 하신분께')
+        st.caption(':unicorn_face:추첨 : 2만원 * 3명')
+        st.caption(':unicorn_face:선정 : 2만원 * 2명')
+        st.markdown('<a href="https://abc.com" target="_blank">만족도조사</a>', unsafe_allow_html=True)
+
+        st.write("")
+        st.write("")
+        # 엑셀 다운로드
+        admin_password = st.text_input(":computer: 관리자", type="password")
+        if admin_password:
+            if admin_password == admin_key:
+                st.success("비밀번호 확인 완료")
+                # 엑셀 파일 다운로드 기능
+                download_excel()
+            else:
+                st.error("잘못된 비밀번호입니다.")
+
+    with col2:
+        st.write("")
+
+        password = st.text_input(":heavy_check_mark: 민사고는 영어 네 글자로 :red_circle: :red_circle: :red_circle: :red_circle: 입니다!", type="password")
+        if password:
+            if password == password_key:
+                # 비밀번호가 맞으면 다운로드 버튼 표시
+                st.success("패스워드 확인 완료!")
+
+                user_input = st.text_input(":eight_pointed_black_star:민사고에 대해 질문하고 엔터를 눌러주세요! (단, 민사고는 KMLA로 입력요망)")
+
+                st.caption(':sparkles:예시) 학생자치위원회 업무를 요약해줄래? KMLA에 가는 길을 알려줄래?')
+                st.caption(':sparkles:예시) 벌점이 3점 이상인 경우 10가지? 병결 신청절차를 상세히 알려줄래?')
+                st.write("")
+
+                if user_input:
+
+                    # 질문을 로깅합니다.
+                    log_question_to_excel(user_input, get_local_ip(), datetime.datetime.now())
+
+                    embeddings_model = OpenAIEmbeddings()
+                    db = Chroma(persist_directory="chroma_db_02", embedding_function=embeddings_model)
+
+                    # Stream구현을(한글자씩 쓰여지는 기능) 위해 Handler 만들기
+                    class StreamHandler(BaseCallbackHandler):
+                        def __init__(self, container, initial_text=""):
+                            self.container = container
+                            self.text=initial_text
+                        def on_llm_new_token(self, token: str, **kwargs) -> None:
+                            self.text += token
+                            self.container.markdown(self.text)
+
+                    question = user_input
+                    chat_box = st.empty()
+                    stream_handler = StreamHandler(chat_box)                
+                    llm = ChatOpenAI(model_name="gpt-4-0125-preview", temperature=0, streaming=True, callbacks=[stream_handler])
+                    qa_chain = RetrievalQA.from_chain_type(llm,retriever=db.as_retriever())         
+                    qa_chain.invoke({"query": question})
+
+            else:
+                st.error("에러")
+
+if __name__ == "__main__":
+    app()
