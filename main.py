@@ -145,7 +145,7 @@ def app():
                     log_question_to_excel(user_input, get_local_ip(), datetime.datetime.now())
 
                     embeddings_model = OpenAIEmbeddings()
-                    db = Chroma(persist_directory="chroma_db_02", embedding_function=embeddings_model)
+                    db = Chroma(persist_directory="chroma_db_10", embedding_function=embeddings_model)
 
                     # Stream구현을(한글자씩 쓰여지는 기능) 위해 Handler 만들기
                     class StreamHandler(BaseCallbackHandler):
