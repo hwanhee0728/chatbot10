@@ -131,12 +131,12 @@ def app():
                 st.success("패스워드 확인 완료!")
 
                 st.write("")
-                user_input = st.text_input(":eight_pointed_black_star:민사고에 대해 질문하고 엔터를 눌러주세요! (단, 민사고는 KMLA로 입력요망)")
+                user_input = st.text_input(":eight_pointed_black_star:민사고에 대해 질문하고 엔터를 눌러주세요!")
 
-                st.caption('(챗봇이 공부한 자료) 학교규정집, 학교연혁, 교직원현황, 방문안내 등')
-                st.caption('(예시 1) 학생자치위원회 업무를 요약해줄래? KMLA에 가는 길을 알려줄래?')
-                st.caption('(예시 2) 민족6품제 규정은? 외국어 능력 기준은? 자율시험제는?')
-                st.caption('(예시 3) 벌점이 3점 이상인 경우 10가지? 병결 신청절차를 상세히 알려줄래?')
+                st.caption(':floppy_disk: 챗봇이 공부한 내용 : 로그인하지 않은 상태의 학교 홈페이지 정보(홈페이지 메뉴내용, 학교규정집 일부)')
+                st.caption(':small_blue_diamond: 예시1 - 학생자치위원회 업무? 민사고에 가는 길?')
+                st.caption(':small_blue_diamond: 예시2 - 민족6품제 규정은? 외국어능력 기준은? 자율시험제는?')
+                st.caption(':small_blue_diamond: 예시3 - 수학선생님은 누구? 병결 신청절차? 결석의 기준?')
                 st.write("")
 
                 if user_input:
@@ -145,7 +145,7 @@ def app():
                     log_question_to_excel(user_input, get_local_ip(), datetime.datetime.now())
 
                     embeddings_model = OpenAIEmbeddings()
-                    db = Chroma(persist_directory="chroma_db_10", embedding_function=embeddings_model)
+                    db = Chroma(persist_directory="chroma_db_11", embedding_function=embeddings_model)
 
                     # Stream구현을(한글자씩 쓰여지는 기능) 위해 Handler 만들기
                     class StreamHandler(BaseCallbackHandler):
