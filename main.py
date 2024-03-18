@@ -136,7 +136,7 @@ def app():
                 st.caption(':floppy_disk: 챗봇이 공부한 내용 : 로그인하지 않고 조회할 수 있는 학교 홈페이지 정보 (학교소개/교육정보 등 홈페이지내용, 학사운영(5장),학교생활규정(6장) 등 학교규정집내용)')
                 st.caption(':small_blue_diamond: 예시1 - 학생자치위원회 업무? 민사고에 가는 길?')
                 st.caption(':small_blue_diamond: 예시2 - 민족6품제 규정은? 외국어능력 기준은? 자율시험제는?')
-                st.caption(':small_blue_diamond: 예시3 - 수학선생님은 누구? 병결 신청절차? 결석의 기준?')
+                st.caption(':small_blue_diamond: 예시3 - 수학선생님은 누구? 병결 신청절차? 미인정 결석의 기준?')
                 st.write("")
 
                 if user_input:
